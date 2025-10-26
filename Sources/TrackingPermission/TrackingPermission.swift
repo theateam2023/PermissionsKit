@@ -26,6 +26,10 @@ import PermissionsKit
 #if PERMISSIONSKIT_TRACKING
 import AppTrackingTransparency
 
+#if canImport(FBSDKCoreKit)
+import FBSDKCoreKit
+#endif
+
 @available(iOS 14, tvOS 14, *)
 public extension HBPermission {
 
@@ -52,6 +56,14 @@ public class TrackingPermission: HBPermission {
     
     public override func request() async -> HBPermission.Status {
         _ = await ATTrackingManager.requestTrackingAuthorization()
+        #if canImport(FBSDKCoreKit)
+        switch status {
+        case .authorized:
+            Settings.shared.isAdvertiserTrackingEnabled = true
+        default:
+            Settings.shared.isAdvertiserTrackingEnabled = false
+        }
+        #endif
         return status
     }
 }
