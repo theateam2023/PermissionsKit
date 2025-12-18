@@ -76,16 +76,8 @@ public class LocationPermission: HBPermission {
         case .denied: return .denied
         case .notDetermined: return .notDetermined
         case .restricted: return .denied
-        case .authorizedAlways:
-            if case .location(let access) = _kind, access == .always {
-                return .authorized
-            }
-            return .denied
-        case .authorizedWhenInUse:
-            if case .location(let access) = _kind, access == .whenInUse {
-                return .authorized
-            }
-            return .denied
+        case .authorizedAlways: return .authorized
+        case .authorizedWhenInUse: return .authorized
         @unknown default: return .denied
         }
     }
@@ -103,33 +95,41 @@ public class LocationPermission: HBPermission {
         return false
     }
     
+    @available(*, unavailable, message: "Use request() stream instead")
     @MainActor
     public override func request() async -> HBPermission.Status {
+        return status
+    }
+    
+    @MainActor
+    public func request() -> AsyncStream<HBPermission.Status> {
+        AsyncStream { continuation in
+            self.request { _ in
+                continuation.yield(self.status)
+            }
+        }
+    }
+    
+    @MainActor
+    func request(complete: @escaping ((HBPermission.Status) -> Void)) {
         switch self._kind {
         case .location(let access):
-            await withCheckedContinuation { continuation in
-                switch access {
-                case .whenInUse:
-                    LocationWhenInUseHandler.shared = LocationWhenInUseHandler()
-                    LocationWhenInUseHandler.shared?.requestPermission() {
-                        DispatchQueue.main.async {
-                            continuation.resume()
-                            LocationWhenInUseHandler.shared = nil
-                        }
+            switch access {
+            case .whenInUse:
+                LocationWhenInUseHandler.shared = LocationWhenInUseHandler()
+                LocationWhenInUseHandler.shared?.requestPermission() {
+                    DispatchQueue.main.async {
+                        complete(self.status)
                     }
-                case .always:
-                    LocationAlwaysHandler.shared = LocationAlwaysHandler()
-                    LocationAlwaysHandler.shared?.requestPermission() {
-                        DispatchQueue.main.async {
-                            continuation.resume()
-                            LocationAlwaysHandler.shared = nil
-                        }
+                }
+            case .always:
+                LocationAlwaysHandler.shared = LocationAlwaysHandler()
+                LocationAlwaysHandler.shared?.requestPermission() {
+                    DispatchQueue.main.async {
+                        complete(self.status)
                     }
                 }
             }
-            
-            return status
-
         default:
             fatalError()
         }
