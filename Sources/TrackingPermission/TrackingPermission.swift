@@ -55,7 +55,11 @@ public class TrackingPermission: HBPermission {
     }
     
     public override func request() async -> HBPermission.Status {
-        _ = await ATTrackingManager.requestTrackingAuthorization()
+        let attStatus = await ATTrackingManager.requestTrackingAuthorization()
+        #if HR_TRACKING_ENABLED
+            HBEvent.log(attStatus == .authorized ? .allowTracking : .notAllowTracking)
+        #endif
+        
         #if canImport(FBSDKCoreKit)
         switch status {
         case .authorized:
