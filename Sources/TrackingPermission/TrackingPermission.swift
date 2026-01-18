@@ -54,21 +54,24 @@ public class TrackingPermission: HBPermission {
         }
     }
     
+    @MainActor
     public override func request() async -> HBPermission.Status {
-        let attStatus = await ATTrackingManager.requestTrackingAuthorization()
+        let attStatus: ATTrackingManager.AuthorizationStatus =
+            await withCheckedContinuation { continuation in
+                ATTrackingManager.requestTrackingAuthorization { status in
+                    continuation.resume(returning: status)
+                }
+            }
+        
         #if HR_TRACKING_ENABLED
             HBEvent.log(attStatus == .authorized ? .allowTracking : .notAllowTracking)
         #endif
         
         #if canImport(FBSDKCoreKit)
-        switch status {
-        case .authorized:
-            Settings.shared.isAdvertiserTrackingEnabled = true
-        default:
-            Settings.shared.isAdvertiserTrackingEnabled = false
-        }
+            Settings.shared.isAdvertiserTrackingEnabled = (attStatus == .authorized)
         #endif
-        return status
+        
+        return attStatus == .authorized ? .authorized : .denied
     }
 }
 #endif
