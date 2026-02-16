@@ -58,7 +58,10 @@ public class ContactsPermission: HBPermission {
         let store = CNContactStore()
         _ = try? await store.requestAccess(for: .contacts)
         
-        return status
+        let currentStatus = self.status
+        logStatus(currentStatus)
+        
+        return currentStatus
     }
 }
 #endif

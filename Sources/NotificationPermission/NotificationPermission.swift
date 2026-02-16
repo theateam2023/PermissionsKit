@@ -73,15 +73,20 @@ public class NotificationPermission: HBPermission {
         case .notification(let access):
             let options = UNAuthorizationOptions(access.map { $0.userNotifcationAuthorizationOptions })
             
+            let resultStatus: HBPermission.Status
+            
             do {
                 _ = try await center.requestAuthorization(options: options)
-                return status
+                resultStatus = self.status
             } catch {
-                return .denied
+                resultStatus = .denied
             }
             
+            logStatus(resultStatus)
+            return resultStatus
+                
         default:
-            fatalError()
+            fatalError("NotificationPermission kind mismatch")
         }
     }
 }

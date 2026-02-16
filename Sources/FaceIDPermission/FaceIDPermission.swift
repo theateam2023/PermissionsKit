@@ -63,13 +63,18 @@ public class FaceIDPermission: HBPermission {
     
     public override func request() async -> HBPermission.Status {
         let context = LAContext()
+        let resultStatus: HBPermission.Status
+        
         do {
             let success = try await context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: " ")
-            
-            return success ? .authorized : .denied
+            resultStatus = success ? .authorized : .denied
         } catch {
-            return .denied
+            resultStatus = .denied
         }
+        
+        logStatus(resultStatus)
+        
+        return resultStatus
     }
 }
 #endif

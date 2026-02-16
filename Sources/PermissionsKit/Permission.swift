@@ -74,6 +74,19 @@ open class HBPermission {
         preconditionFailure("This method must be overridden.")
     }
     
+    public func logStatus(_ status: HBPermission.Status) {
+        let params: [HBEvent: Any] = [
+            .permission_kind: self.kind.name,
+            .status: status.description
+        ]
+        
+        #if HR_TRACKING_ENABLED
+        HBEvent.log(.permission, params: params)
+        #endif
+        
+        print("📊 [Firebase Log] Permission: \(self.kind.name) updated to \(status.description)")
+    }
+    
     open func request() async -> HBPermission.Status {
         preconditionFailure("This method must be overridden.")
     }

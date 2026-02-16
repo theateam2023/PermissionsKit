@@ -50,11 +50,15 @@ public class SiriPermission: HBPermission {
     }
     
     public override func request() async -> HBPermission.Status {
-        return await withCheckedContinuation { continuation in
+        let resultStatus = await withCheckedContinuation { (continuation: CheckedContinuation<HBPermission.Status, Never>) in
             INPreferences.requestSiriAuthorization { [weak self] _ in
                 continuation.resume(returning: self?.status ?? .denied)
             }
         }
+        
+        logStatus(resultStatus)
+        
+        return resultStatus
     }
 }
 #endif

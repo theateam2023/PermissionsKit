@@ -69,13 +69,18 @@ public class BluetoothPermission: HBPermission, @unchecked Sendable {
     }
     
     public override func request() async -> HBPermission.Status {
-        await withCheckedContinuation { continuation in
+        let result = await withCheckedContinuation { continuation in
             BluetoothHandler.shared.completion = { [weak self] in
-                continuation.resume(returning: self?.status ?? .denied)
+                let currentStatus = self?.status ?? .denied
+                continuation.resume(returning: currentStatus)
             }
             
             BluetoothHandler.shared.reqeustUpdate()
         }
+        
+        logStatus(result)
+        
+        return result
     }
 }
 #endif

@@ -50,7 +50,7 @@ public class MotionPermission: HBPermission {
     }
     
     public override func request() async -> HBPermission.Status {
-        await withCheckedContinuation { continuation in
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
             let manager = CMMotionActivityManager()
             let today = Date()
             
@@ -60,7 +60,10 @@ public class MotionPermission: HBPermission {
             }
         }
         
-        return status
+        let currentStatus = self.status
+        logStatus(currentStatus)
+        
+        return currentStatus
     }
 }
 #endif

@@ -61,7 +61,10 @@ public class RemindersPermission: HBPermission {
             _ = try? await eventStore.requestAccess(to: .reminder)
         }
 
-        return status
+        let currentStatus = self.status
+        logStatus(currentStatus)
+
+        return currentStatus
     }
 }
 #endif

@@ -52,21 +52,29 @@ public class HealthPermission: HBPermission {
     
     public func request(forReading readingTypes: Set<HKObjectType>, writing writingTypes: Set<HKSampleType>) async -> HBPermission.Status {
         guard HKHealthStore.isHealthDataAvailable() else {
-            return .notSupported
+            let result: HBPermission.Status = .notSupported
+            logStatus(result)
+            return result
         }
         
         let store = HKHealthStore()
+        let resultStatus: HBPermission.Status
         
         do {
             try await store.requestAuthorization(toShare: writingTypes, read: readingTypes)
+            
             if let type = readingTypes.first {
-                return status(for: type)
+                resultStatus = status(for: type)
             } else {
-                return .denied
+                resultStatus = .denied
             }
         } catch {
-            return .denied
+            resultStatus = .denied
         }
+        
+        logStatus(resultStatus)
+        
+        return resultStatus
     }
     
     public override var canBePresentWithCustomInterface: Bool { false }

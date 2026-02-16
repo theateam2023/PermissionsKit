@@ -59,8 +59,11 @@ public class PhotoLibraryPermission: HBPermission {
     @MainActor
     public override func request() async -> HBPermission.Status {
         _ = await PHPhotoLibrary.requestAuthorization(for: .readWrite)
-        return status
-    }
-}
+        
+        let currentStatus = self.status
+        logStatus(currentStatus)
+        
+        return currentStatus
+    }}
 #endif
 

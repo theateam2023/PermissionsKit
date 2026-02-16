@@ -52,13 +52,17 @@ public class CameraPermission: HBPermission {
     }
     
     public override func request() async -> HBPermission.Status {
-        return await withCheckedContinuation { continuation in
+        let resultStatus = await withCheckedContinuation { continuation in
             AVCaptureDevice.requestAccess(for: .video) { granted in
                 Task { @MainActor in
-                    continuation.resume(returning: granted ? .authorized : .denied)
+                    continuation.resume(returning: granted ? HBPermission.Status.authorized : HBPermission.Status.denied)
                 }
             }
         }
+        
+        logStatus(resultStatus)
+        
+        return resultStatus
     }
 }
 #endif

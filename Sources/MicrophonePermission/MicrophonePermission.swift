@@ -60,7 +60,7 @@ public class MicrophonePermission: HBPermission {
     
     public override func request() async -> HBPermission.Status {
         #if os(iOS)
-        await withCheckedContinuation { continuation in
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
             AVAudioSession.sharedInstance().requestRecordPermission { _ in
                 continuation.resume()
             }
@@ -69,7 +69,10 @@ public class MicrophonePermission: HBPermission {
         _ = await AVCaptureDevice.requestAccess(for: .audio)
         #endif
         
-        return status
+        let currentStatus = self.status
+        logStatus(currentStatus)
+        
+        return currentStatus
     }
 }
 #endif

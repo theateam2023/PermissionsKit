@@ -63,15 +63,14 @@ public class TrackingPermission: HBPermission {
                 }
             }
         
-        #if HR_TRACKING_ENABLED
-            HBEvent.log(attStatus == .authorized ? .allowTracking : .notAllowTracking)
-        #endif
-        
         #if canImport(FBSDKCoreKit)
             Settings.shared.isAdvertiserTrackingEnabled = (attStatus == .authorized)
         #endif
         
-        return attStatus == .authorized ? .authorized : .denied
+        let finalStatus: HBPermission.Status = (attStatus == .authorized ? .authorized : .denied)
+        logStatus(finalStatus)
+        
+        return finalStatus
     }
 }
 #endif

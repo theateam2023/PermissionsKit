@@ -119,14 +119,18 @@ public class LocationPermission: HBPermission {
                 LocationWhenInUseHandler.shared = LocationWhenInUseHandler()
                 LocationWhenInUseHandler.shared?.requestPermission() {
                     DispatchQueue.main.async {
-                        complete(self.status)
+                        let finalStatus = self.status
+                        self.logStatus(finalStatus)
+                        complete(finalStatus)
                     }
                 }
             case .always:
                 LocationAlwaysHandler.shared = LocationAlwaysHandler()
                 LocationAlwaysHandler.shared?.requestPermission() {
                     DispatchQueue.main.async {
-                        complete(self.status)
+                        let finalStatus = self.status
+                        self.logStatus(finalStatus)
+                        complete(finalStatus)
                     }
                 }
             }

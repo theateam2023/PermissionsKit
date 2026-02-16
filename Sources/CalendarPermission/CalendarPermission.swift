@@ -107,7 +107,10 @@ public class CalendarPermission: HBPermission {
             _ = try? await eventStore.requestAccess(to: .event)
         }
         
-        return status
+        let currentStatus = self.status
+        logStatus(currentStatus)
+        
+        return currentStatus
     }
 }
 #endif

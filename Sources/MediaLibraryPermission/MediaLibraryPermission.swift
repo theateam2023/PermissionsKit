@@ -51,7 +51,11 @@ public class MediaLibraryPermission: HBPermission {
     
     public override func request() async -> HBPermission.Status {
         _ = await MPMediaLibrary.requestAuthorization()
-        return status
+        
+        let currentStatus = self.status
+        logStatus(currentStatus)
+        
+        return currentStatus
     }
 }
 #endif
