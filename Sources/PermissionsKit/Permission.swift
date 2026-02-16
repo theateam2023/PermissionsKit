@@ -84,7 +84,9 @@ open class HBPermission {
         HBEvent.log(.permission, params: params)
         #endif
         
+        #if DEBUG
         print("📊 [Firebase Log] Permission: \(self.kind.name) updated to \(status.description)")
+        #endif
     }
     
     open func request() async -> HBPermission.Status {
